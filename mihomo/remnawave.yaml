@@ -1,30 +1,4 @@
-# ВНИМАНИЕ! ЭТО БЕТА НЕ ДЛЯ REMNAWAVE, А ДЛЯ РУЧНОЙ ВСТАВКИ
-proxy-providers:
-  prov:
-    type: http
-    url: <ВВЕДИТЕ URL ПОДПИСКИ> # в формате mihomo. для Remnawave необходимо в настройках включить mihomo.
-    path: ./provider/proxies.yaml
-    interval: 86400
-# Если нет ссылки - удалите блок выше, расскоментируйте блок ниже и заполните
-# можете воспользоваться конвертером https://dikozimpact.github.io/clash-convertor/
-#proxies:
-#- name: <PROXYNAME> (EXAMPLE)
-#  type: vless
-#  server: <server address>
-#  port: 443
-#  ip-version: ipv4
-#  uuid: <uuid>
-#  network: tcp
-#  tls: true
-#  udp: true
-#  flow: xtls-rprx-vision
-#  servername: <servername>
-#  reality-opts:
-#    public-key: <public key>
-#    short-id: <shot id>
-#    support-x25519mlkem768: true
-#  client-fingerprint: chrome
-#- name: <Another name>
+#ЭТО БЕТА
 mixed-port: 7890
 mode: rule
 log-level: silent
@@ -39,27 +13,27 @@ tun:
   auto-route: true
   auto-detect-interface: true
   dns-hijack:
-  - any:53
-  - tcp://any:53
+    - any:53
+    - tcp://any:53
   strict-route: true
   route-exclude-address:
-  - 224.0.0.0/3
-  - 10.0.0.0/8
-  - 127.0.0.0/8
-  - 100.64.0.0/10
-  - 172.16.0.0/12
-  - 198.18.0.0/15
-  - 169.254.0.0/16
-  - 192.168.0.0/16
-  - 192.0.0.0/24
-  - 192.0.2.0/24
-  - 192.88.99.0/24
-  - 198.51.100.0/24
-  - 203.0.113.0/24
-  - fc00::/7
-  - ff00::/8
-  - fe80::/10
-  - ::/127
+    - 224.0.0.0/3
+    - 10.0.0.0/8
+    - 127.0.0.0/8
+    - 100.64.0.0/10
+    - 172.16.0.0/12
+    - 198.18.0.0/15
+    - 169.254.0.0/16
+    - 192.168.0.0/16
+    - 192.0.0.0/24
+    - 192.0.2.0/24
+    - 192.88.99.0/24
+    - 198.51.100.0/24
+    - 203.0.113.0/24
+    - fc00::/7
+    - ff00::/8
+    - fe80::/10
+    - ::/127
 dns:
   enable: true
   use-hosts: true
@@ -67,96 +41,111 @@ dns:
   ipv6: false
   enhanced-mode: redir-host
   default-nameserver:
-  - 77.88.8.8
+    - 77.88.8.8
   proxy-server-nameserver:
-  - 77.88.8.8
+    - 77.88.8.8
   direct-nameserver:
-  - 77.88.8.8
+    - 77.88.8.8
   nameserver:
-  - 76.76.2.41#PROXY
+    - 76.76.2.41#PROXY
 sniffer:
   enable: true
   override-destination: false
   sniff:
     HTTP:
       ports:
-      - 80
-      - 8080-8880
+        - 80
+        - 8080-8880
     TLS:
       ports:
-      - 443
-      - 8443
+        - 443
+        - 8443
   skip-dst-address:
-  - 224.0.0.0/3
-  - 0.0.0.0/8
-  - 10.0.0.0/8
-  - 127.0.0.0/8
-  - 100.64.0.0/10
-  - 172.16.0.0/12
-  - 198.18.0.0/15
-  - 169.254.0.0/16
-  - 192.168.0.0/16
-  - 192.0.0.0/24
-  - 192.0.2.0/24
-  - 192.88.99.0/24
-  - 198.51.100.0/24
-  - 203.0.113.0/24
-  - fc00::/7
-  - ff00::/8
-  - fe80::/10
-  - ::/127
+    - 224.0.0.0/3
+    - 0.0.0.0/8
+    - 10.0.0.0/8
+    - 127.0.0.0/8
+    - 100.64.0.0/10
+    - 172.16.0.0/12
+    - 198.18.0.0/15
+    - 169.254.0.0/16
+    - 192.168.0.0/16
+    - 192.0.0.0/24
+    - 192.0.2.0/24
+    - 192.88.99.0/24
+    - 198.51.100.0/24
+    - 203.0.113.0/24
+    - fc00::/7
+    - ff00::/8
+    - fe80::/10
+    - ::/127
 find-process-mode: strict
 profile:
   store-selected: true
   store-fake-ip: true
+proxies: # LEAVE THIS LINE!
 proxy-groups:
-- name: 🛡️ VPN
-  icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hijacking.png
-  type: select
-  proxies:
-  - ⚡️ Авто
-  include-all: true
-  url: https://www.gstatic.com/generate_204
-- name: 💬 Discord.exe
-  icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Discord.png
-  type: select
-  include-all: true
-  proxies:
-  - 🛡️ VPN
-  - 🔓 Без VPN
-- name: 🎮 Игры
-  icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Game.png
-  type: select
-  proxies:
-  - 🛡️ VPN
-  - 🔓 Без VPN
-- name: ⚡️ Авто
-  type: url-test
-  tolerance: 150
-  url: https://www.gstatic.com/generate_204
-  interval: 300
-  include-all: true
-  hidden: true
-- name: PROXY
-  type: select
-  hidden: true
-  proxies:
-  - 🛡️ VPN
-- name: 🔓 Без VPN
-  type: select
-  hidden: true
-  proxies:
-  - DIRECT
-- name: ⛔ Блок
-  type: select
-  hidden: true
-  proxies:
-  - REJECT
-- name: ⏭️ Пропуск
-  type: select
-  hidden: true
-  proxies:
-  - PASS
+  - name: 🛡️ VPN
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hijacking.png
+    type: select
+    proxies:
+      - ⚡️ Авто
+    # LEAVE THIS LINE!
+    url: https://www.gstatic.com/generate_204
+  - name: 💬 Discord.exe
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Discord.png
+    type: select
+    remnawave:
+      include-proxies: false
+    include-all: true
+    proxies:
+      - 🛡️ VPN
+      - 🔓 Без VPN
+  - name: 🎮 Игры
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Game.png
+    type: select
+    remnawave:
+      include-proxies: false
+    proxies:
+      - 🛡️ VPN
+      - 🔓 Без VPN
+  - name: ⚡️ Авто
+    type: url-test
+    tolerance: 150
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+    # exclude-filter: прокси, которые хотите исключить
+    proxies:
+    # LEAVE THIS LINE!
+    hidden: true
+  - name: PROXY
+    type: select
+    hidden: true
+    remnawave:
+      include-proxies: false
+    proxies:
+      - 🛡️ VPN
+  - name: 🔓 Без VPN
+    type: select
+    hidden: true
+    remnawave:
+      include-proxies: false
+    proxies:
+      - DIRECT
+  - name: ⛔ Блок
+    type: select
+    hidden: true
+    remnawave:
+      include-proxies: false
+    proxies:
+      - REJECT
+  - name: ⏭️ Пропуск
+    type: select
+    hidden: true
+    remnawave:
+      include-proxies: false
+    proxies:
+      - PASS
 rule-providers:
   private-ips:
     type: http
@@ -307,25 +296,25 @@ rule-providers:
     interval: 86400
 
 rules:
-- RULE-SET,private-ips,DIRECT,no-resolve
-- RULE-SET,private-domains,DIRECT
-- AND,((NETWORK,UDP),(OR,((DST-PORT,443),(DST-PORT,853)))),REJECT
-- OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT
-- OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-domains)),DIRECT
-- OR,((PROCESS-NAME,Discord.exe),(PROCESS-NAME,discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
-- RULE-SET,twitch-ads,PROXY
-- RULE-SET,games,🎮 Игры
-- RULE-SET,ru-apps,DIRECT
-- RULE-SET,category-ru,DIRECT
-- RULE-SET,microsoft,DIRECT
-- RULE-SET,apple,DIRECT
-- RULE-SET,google-play,DIRECT
-- RULE-SET,epicgames,DIRECT
-- RULE-SET,riot,DIRECT
-- RULE-SET,escapefromtarkov,DIRECT
-- RULE-SET,steam,DIRECT
-- RULE-SET,twitch,DIRECT
-- RULE-SET,pinterest,DIRECT
-- RULE-SET,faceit,DIRECT
-- RULE-SET,direct-ips,DIRECT
-- MATCH,PROXY
+  - RULE-SET,private-ips,DIRECT,no-resolve
+  - RULE-SET,private-domains,DIRECT
+  - AND,((NETWORK,UDP),(OR,((DST-PORT,443),(DST-PORT,853)))),REJECT
+  - OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT
+  - OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-domains)),DIRECT
+  - OR,((PROCESS-NAME,Discord.exe),(PROCESS-NAME,discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
+  - RULE-SET,twitch-ads,PROXY
+  - RULE-SET,games,🎮 Игры
+  - RULE-SET,ru-apps,DIRECT
+  - RULE-SET,category-ru,DIRECT
+  - RULE-SET,microsoft,DIRECT
+  - RULE-SET,apple,DIRECT
+  - RULE-SET,google-play,DIRECT
+  - RULE-SET,epicgames,DIRECT
+  - RULE-SET,riot,DIRECT
+  - RULE-SET,escapefromtarkov,DIRECT
+  - RULE-SET,steam,DIRECT
+  - RULE-SET,twitch,DIRECT
+  - RULE-SET,pinterest,DIRECT
+  - RULE-SET,faceit,DIRECT
+  - RULE-SET,direct-ips,DIRECT
+  - MATCH,PROXY
