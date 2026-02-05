@@ -1,4 +1,5 @@
-#ЭТО БЕТА
+# ВНИМАНИЕ! ЭТО БЕТА 
+# НЕ ДЛЯ РУЧНОЙ ВСТАВКИ, А ДЛЯ REMNAWAVE!
 mixed-port: 7890
 mode: rule
 log-level: silent
