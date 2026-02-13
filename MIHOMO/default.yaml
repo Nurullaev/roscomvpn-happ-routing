@@ -1,4 +1,4 @@
-# ВНИМАНИЕ! ЭТО БЕТА 
+# ВНИМАНИЕ! ЭТО БЕТА
 # НЕ ДЛЯ REMNAWAVE, А ДЛЯ РУЧНОЙ ВСТАВКИ!
 proxy-providers:
   prov:
@@ -310,25 +310,25 @@ rule-providers:
     interval: 86400
 
 rules:
-- RULE-SET,private-ips,DIRECT,no-resolve
-- RULE-SET,private-domains,DIRECT
-- AND,((NETWORK,UDP),(OR,((DST-PORT,443),(DST-PORT,853)))),REJECT
-- OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT
-- OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-domains)),DIRECT
-- OR,((PROCESS-NAME,Discord.exe),(PROCESS-NAME,discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
-- RULE-SET,twitch-ads,PROXY
-- RULE-SET,games,🎮 Игры
-- RULE-SET,ru-apps,DIRECT
-- RULE-SET,category-ru,DIRECT
-- RULE-SET,microsoft,DIRECT
-- RULE-SET,apple,DIRECT
-- RULE-SET,google-play,DIRECT
-- RULE-SET,epicgames,DIRECT
-- RULE-SET,riot,DIRECT
-- RULE-SET,escapefromtarkov,DIRECT
-- RULE-SET,steam,DIRECT
-- RULE-SET,twitch,DIRECT
-- RULE-SET,pinterest,DIRECT
-- RULE-SET,faceit,DIRECT
-- RULE-SET,direct-ips,DIRECT
-- MATCH,PROXY
+  - RULE-SET,private-ips,DIRECT,no-resolve
+  - RULE-SET,private-domains,DIRECT
+  - AND,((NETWORK,UDP),(OR,((DST-PORT,443),(DST-PORT,853)))),REJECT
+  - OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT
+  - OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-domains)),DIRECT
+  - OR,((PROCESS-NAME,Discord.exe),(PROCESS-NAME,discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
+  - RULE-SET,twitch-ads,PROXY
+  - RULE-SET,games,🎮 Игры
+  - RULE-SET,epicgames,🎮 Игры
+  - RULE-SET,riot,🎮 Игры
+  - RULE-SET,escapefromtarkov,🎮 Игры
+  - RULE-SET,steam,🎮 Игры
+  - RULE-SET,faceit,🎮 Игры
+  - RULE-SET,ru-apps,DIRECT
+  - RULE-SET,category-ru,DIRECT
+  - RULE-SET,microsoft,DIRECT
+  - RULE-SET,apple,DIRECT
+  - RULE-SET,google-play,DIRECT
+  - RULE-SET,twitch,DIRECT
+  - RULE-SET,pinterest,DIRECT
+  - RULE-SET,direct-ips,DIRECT
+  - MATCH,PROXY
