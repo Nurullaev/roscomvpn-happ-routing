@@ -95,6 +95,16 @@ proxy-groups:
       - ⚡️ Авто
     # LEAVE THIS LINE!
     url: https://www.gstatic.com/generate_204
+  - name: 📺 Youtube
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
+    type: select
+    remnawave:
+      include-proxies: false
+    include-all: true
+    # filter: '🇫🇮 Finland' # Filter connections containing this value (hosts should be named like 🇫🇮 Finland1, 🇫🇮 Finland2, etc.)
+    proxies:
+      - 🛡️ VPN
+      # Если хотите оставить на выбор только определенные узлы, воспользуйтесь filter
   - name: 💬 Discord.exe
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Discord.png
     type: select
@@ -103,15 +113,15 @@ proxy-groups:
     include-all: true
     proxies:
       - 🛡️ VPN
-      - 🔓 Без VPN
   - name: 🎮 Игры
     icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Game.png
     type: select
     remnawave:
       include-proxies: false
+    include-all: true
     proxies:
-      - 🛡️ VPN
       - 🔓 Без VPN
+      - 🛡️ VPN
   - name: ⚡️ Авто
     type: url-test
     tolerance: 150
@@ -198,6 +208,13 @@ rule-providers:
     format: mrs
     url: https://raw.githubusercontent.com/hydraponique/roscomvpn-geosite/release/mihomo/twitch-ads.mrs
     path: ./ruleset/twitch-ads.mrs
+    interval: 86400
+  youtube:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://raw.githubusercontent.com/hydraponique/roscomvpn-geosite/release/mihomo/youtube.mrs
+    path: ./ruleset/youtube.mrs
     interval: 86400
   games:
     type: http
@@ -304,6 +321,7 @@ rules:
   - AND,((NETWORK,UDP),(OR,((DST-PORT,443),(DST-PORT,853)))),REJECT
   - OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT
   - OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-domains)),DIRECT
+  - RULE-SET,youtube,📺 Youtube
   - OR,((PROCESS-NAME,Discord.exe),(PROCESS-NAME,discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
   - RULE-SET,twitch-ads,PROXY
   - RULE-SET,games,🎮 Игры

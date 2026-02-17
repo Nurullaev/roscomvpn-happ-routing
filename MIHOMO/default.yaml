@@ -120,19 +120,27 @@ proxy-groups:
   - ⚡️ Авто
   include-all: true
   url: https://www.gstatic.com/generate_204
+- name: 📺 Youtube
+  icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
+  type: select
+  remnawave:
+    include-proxies: false
+  include-all: true
+  proxies:
+    - 🛡️ VPN
 - name: 💬 Discord.exe
   icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Discord.png
   type: select
   include-all: true
   proxies:
   - 🛡️ VPN
-  - 🔓 Без VPN
 - name: 🎮 Игры
   icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Game.png
   type: select
+  include-all: true
   proxies:
-  - 🛡️ VPN
   - 🔓 Без VPN
+  - 🛡️ VPN
 - name: ⚡️ Авто
   type: url-test
   tolerance: 150
@@ -209,6 +217,13 @@ rule-providers:
     format: mrs
     url: https://raw.githubusercontent.com/hydraponique/roscomvpn-geosite/release/mihomo/twitch-ads.mrs
     path: ./ruleset/twitch-ads.mrs
+    interval: 86400
+  youtube:
+    type: http
+    behavior: domain
+    format: mrs
+    url: https://raw.githubusercontent.com/hydraponique/roscomvpn-geosite/release/mihomo/youtube.mrs
+    path: ./ruleset/youtube.mrs
     interval: 86400
   games:
     type: http
@@ -316,6 +331,7 @@ rules:
   - OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT
   - OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-domains)),DIRECT
   - OR,((PROCESS-NAME,Discord.exe),(PROCESS-NAME,discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
+  - RULE-SET,youtube,📺 Youtube
   - RULE-SET,twitch-ads,PROXY
   - RULE-SET,games,🎮 Игры
   - RULE-SET,epicgames,🎮 Игры
