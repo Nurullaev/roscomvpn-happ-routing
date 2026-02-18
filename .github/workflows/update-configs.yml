@@ -2,6 +2,15 @@ name: Update Routing Configs
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "README.md"
+      - ".gitignore"
+      - "LICENSE"
+  repository_dispatch:
+    types: [update-routing-configs]
 
 permissions:
   contents: write
