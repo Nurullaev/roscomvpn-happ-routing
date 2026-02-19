@@ -1,0 +1,51 @@
+{
+  "Name": "RoscomVPN",
+  "GlobalProxy": "true",
+  "UseChunkFiles": "true",
+  "RemoteDns": "8.8.8.8",
+  "DomesticDns": "77.88.8.8",
+  "RemoteDNSType": "DoU",
+  "RemoteDNSDomain": "https://dns.google/dns-query",
+  "RemoteDNSIP": "8.8.8.8",
+  "DomesticDNSType": "DoU",
+  "DomesticDNSDomain": "https://common.dot.dns.yandex.net/dns-query",
+  "DomesticDNSIP": "77.88.8.8",
+  "Geoipurl": "https://cdn.jsdelivr.net/gh/hydraponique/roscomvpn-geoip@202602190502/release/geoip.dat",
+  "Geositeurl": "https://cdn.jsdelivr.net/gh/hydraponique/roscomvpn-geosite@202602181705/release/geosite.dat",
+  "LastUpdated": "1771477425",
+  "DnsHosts": {},
+  "RouteOrder": "block-proxy-direct",
+  "DirectSites": [
+    "geosite:private",
+    "geosite:category-ru",
+    "geosite:microsoft",
+    "geosite:apple",
+    "geosite:google-play",
+    "geosite:epicgames",
+    "geosite:riot",
+    "geosite:escapefromtarkov",
+    "geosite:steam",
+    "geosite:twitch",
+    "geosite:pinterest",
+    "geosite:faceit"
+  ],
+  "DirectIp": [
+    "geoip:private",
+    "geoip:direct"
+  ],
+  "ProxySites": [
+    "geosite:github",
+    "geosite:twitch-ads",
+    "geosite:youtube",
+    "geosite:telegram"
+  ],
+  "ProxyIp": [],
+  "BlockSites": [
+    "geosite:win-spy",
+    "geosite:torrent",
+    "geosite:category-ads"
+  ],
+  "BlockIp": [],
+  "DomainStrategy": "IPIfNonMatch",
+  "FakeDNS": "false"
+}
