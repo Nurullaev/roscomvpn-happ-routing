@@ -340,11 +340,11 @@ rule-providers:
 rules:
   - RULE-SET,private-ips,DIRECT,no-resolve
   - RULE-SET,private-domains,DIRECT
-  - AND,((NETWORK,UDP),(OR,((DST-PORT,443),(DST-PORT,853)))),REJECT
-  - OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT
+  - AND,((NETWORK,UDP),(OR,((DST-PORT,443),(DST-PORT,853)))),REJECT-DROP
+  - OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT-DROP
   - OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-domains)),DIRECT
+  - OR,((PROCESS-NAME-REGEX,(?i)discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
   - RULE-SET,youtube,📺 Youtube
-  - OR,((PROCESS-NAME,Discord.exe),(PROCESS-NAME,discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
   - RULE-SET,twitch-ads,PROXY
   - RULE-SET,games,🎮 Игры
   - RULE-SET,epicgames,🎮 Игры
