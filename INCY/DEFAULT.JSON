@@ -10,9 +10,9 @@
   "DomesticDNSType": "DoU",
   "DomesticDNSDomain": "https://common.dot.dns.yandex.net/dns-query",
   "DomesticDNSIP": "77.88.8.8",
-  "Geoipurl": "https://cdn.jsdelivr.net/gh/hydraponique/roscomvpn-geoip@202602200651/release/geoip.dat",
-  "Geositeurl": "https://cdn.jsdelivr.net/gh/hydraponique/roscomvpn-geosite@202602200653/release/geosite.dat",
-  "LastUpdated": "1771570465",
+  "Geoipurl": "https://cdn.jsdelivr.net/gh/hydraponique/roscomvpn-geoip@202602200710/release/geoip.dat",
+  "Geositeurl": "https://cdn.jsdelivr.net/gh/hydraponique/roscomvpn-geosite@202602200710/release/geosite.dat",
+  "LastUpdated": "1771571479",
   "DnsHosts": {},
   "RouteOrder": "block-proxy-direct",
   "DirectSites": [
