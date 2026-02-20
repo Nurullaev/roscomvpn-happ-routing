@@ -134,8 +134,8 @@ jobs:
 
           if [[ "$current_tag" < "$max_tag" ]]; then
             now_epoch="$(date -u +%s)"
-            geoip_url="https://cdn.jsdelivr.net/gh/${GEOIP_REPO}@${geoip_tag}/release/geoip.dat"
-            geosite_url="https://cdn.jsdelivr.net/gh/${GEOSITE_REPO}@${geosite_tag}/release/geosite.dat"
+            geoip_url="https://cdn.jsdelivr.net/gh/${GEOIP_REPO}@release/geoip.dat"
+            geosite_url="https://cdn.jsdelivr.net/gh/${GEOSITE_REPO}@$release/geosite.dat"
 
             curl -fsSLI "$geoip_url" >/dev/null
             curl -fsSLI "$geosite_url" >/dev/null
