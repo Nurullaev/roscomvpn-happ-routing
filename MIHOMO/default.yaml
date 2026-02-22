@@ -72,10 +72,13 @@ dns:
     - rule-set:private-domains
   default-nameserver:
   - 77.88.8.8
+  - 8.8.8.8
   proxy-server-nameserver:
   - 77.88.8.8
+  - 8.8.8.8
   direct-nameserver:
   - 77.88.8.8
+  - 8.8.8.8
   nameserver:
   - 8.8.8.8#PROXY
 sniffer:
