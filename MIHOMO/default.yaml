@@ -33,7 +33,6 @@ allow-lan: false
 ipv6: false
 unified-delay: true
 tcp-concurrent: true
-disable-keep-alive: true
 tun:
   enable: true
   stack: system
@@ -41,7 +40,6 @@ tun:
   auto-detect-interface: true
   dns-hijack:
   - any:53
-  - tcp://any:53
   strict-route: true
   route-exclude-address:
   - 224.0.0.0/3
@@ -56,18 +54,11 @@ tun:
   - 192.88.99.0/24
   - 198.51.100.0/24
   - 203.0.113.0/24
-  - fc00::/7
-  - ff00::/8
-  - fe80::/10
-  - ::/127
 dns:
   enable: true
-  use-hosts: true
-  use-system-hosts: true
   ipv6: false
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
-  fake-ip-filter-mode: blacklist
   fake-ip-filter:
     - rule-set:private-domains
   default-nameserver:
@@ -107,11 +98,6 @@ sniffer:
   - 192.88.99.0/24
   - 198.51.100.0/24
   - 203.0.113.0/24
-  - fc00::/7
-  - ff00::/8
-  - fe80::/10
-  - ::/127
-find-process-mode: strict
 profile:
   store-selected: true
   store-fake-ip: true
