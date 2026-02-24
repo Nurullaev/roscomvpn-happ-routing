@@ -359,7 +359,7 @@ rules:
   - AND,((NETWORK,UDP),(OR,((DST-PORT,443),(DST-PORT,853)))),REJECT-DROP
   - OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT-DROP
   - OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-domains)),DIRECT
-  - OR,((PROCESS-NAME-WILDCARD,discord*),(PROCESS-NAME-WILDCARD,vesktop*)),💬 Discord.exe
+  - OR,((PROCESS-NAME-REGEX,(?i)discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
   - RULE-SET,games,🎮 Игры
   - RULE-SET,ru-apps,DIRECT
   - RULE-SET,github,PROXY
