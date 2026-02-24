@@ -111,7 +111,7 @@ sniffer:
   - ff00::/8
   - fe80::/10
   - ::/127
-find-process-mode: always
+find-process-mode: strict
 profile:
   store-selected: true
   store-fake-ip: true
