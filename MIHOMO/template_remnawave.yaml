@@ -4,7 +4,7 @@ mixed-port: 7890
 mode: rule
 log-level: silent
 allow-lan: false
-ipv6: false
+ipv6: true
 unified-delay: true
 tcp-concurrent: true
 tun:
@@ -28,6 +28,10 @@ tun:
     - 192.88.99.0/24
     - 198.51.100.0/24
     - 203.0.113.0/24
+    - fc00::/7
+    - ff00::/8
+    - fe80::/10
+    - ::/127
 dns:
   enable: true
   ipv6: false
@@ -37,15 +41,19 @@ dns:
     - rule-set:private-domains
   default-nameserver:
     - 77.88.8.8
+    - 8.8.8.8
   proxy-server-nameserver:
     - 77.88.8.8
+    - 8.8.8.8
   direct-nameserver:
     - 77.88.8.8
+    - 8.8.8.8
   nameserver:
     - 8.8.8.8#PROXY
 sniffer:
   enable: true
   override-destination: false
+  parse-pure-ip: true
   sniff:
     HTTP:
       ports:
@@ -69,6 +77,11 @@ sniffer:
     - 192.88.99.0/24
     - 198.51.100.0/24
     - 203.0.113.0/24
+    - fc00::/7
+    - ff00::/8
+    - fe80::/10
+    - ::/127
+find-process-mode: strict
 profile:
   store-selected: true
   store-fake-ip: true
@@ -114,8 +127,9 @@ proxy-groups:
     url: https://www.gstatic.com/generate_204
     interval: 300
     # exclude-filter: прокси, которые хотите исключить
-    proxies:
-    # LEAVE THIS LINE!
+    remnawave:
+      include-proxies: false
+    include-all: true
     hidden: true
   - name: PROXY
     type: select
@@ -341,27 +355,31 @@ rule-providers:
 
 rules:
   - RULE-SET,private-ips,DIRECT,no-resolve
-  - RULE-SET,private-domains,DIRECT
+  - IPCIDR,::/0,REJECT-DROP,no-resolve
   - AND,((NETWORK,UDP),(OR,((DST-PORT,443),(DST-PORT,853)))),REJECT-DROP
-  - OR,((RULE-SET,category-ads),(RULE-SET,win-spy)),REJECT-DROP
-  - OR,((RULE-SET,torrent-clients),(RULE-SET,torrent-domains)),DIRECT
-  - OR,((PROCESS-NAME-REGEX,(?i)discord),(PROCESS-NAME,vesktop)),💬 Discord.exe
-  - RULE-SET,games,🎮 Игры
-  - RULE-SET,ru-apps,DIRECT
-  - RULE-SET,github,PROXY
+  - RULE-SET,private-domains,DIRECT
+  - RULE-SET,category-ads,REJECT-DROP
+  - RULE-SET,win-spy,REJECT-DROP
+  - RULE-SET,torrent-domains,DIRECT
   - RULE-SET,twitch-ads,PROXY
   - RULE-SET,youtube,📺 Youtube
   - RULE-SET,telegram,PROXY
-  - RULE-SET,category-ru,DIRECT
-  - RULE-SET,microsoft,DIRECT
-  - RULE-SET,apple,DIRECT
-  - RULE-SET,google-play,DIRECT
+  - RULE-SET,github,PROXY
   - RULE-SET,epicgames,🎮 Игры
   - RULE-SET,riot,🎮 Игры
   - RULE-SET,escapefromtarkov,🎮 Игры
   - RULE-SET,steam,🎮 Игры
-  - RULE-SET,twitch,DIRECT
-  - RULE-SET,pinterest,DIRECT
   - RULE-SET,faceit,🎮 Игры
+  - RULE-SET,twitch,DIRECT
+  - RULE-SET,microsoft,DIRECT
+  - RULE-SET,apple,DIRECT
+  - RULE-SET,google-play,DIRECT
+  - RULE-SET,pinterest,DIRECT
+  - RULE-SET,category-ru,DIRECT
+  - RULE-SET,torrent-clients,DIRECT
+  - PROCESS-NAME-REGEX,discord,💬 Discord.exe
+  - PROCESS-NAME-REGEX,vesktop,💬 Discord.exe
+  - RULE-SET,games,🎮 Игры
+  - RULE-SET,ru-apps,DIRECT
   - RULE-SET,direct-ips,DIRECT
   - MATCH,PROXY
