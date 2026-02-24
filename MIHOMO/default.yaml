@@ -122,8 +122,6 @@ proxy-groups:
 - name: 📺 Youtube
   icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/YouTube.png
   type: select
-  remnawave:
-    include-proxies: false
   include-all: true
   proxies:
     - 🛡️ VPN
