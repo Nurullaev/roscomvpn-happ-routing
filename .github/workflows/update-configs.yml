@@ -103,6 +103,15 @@ jobs:
             mv "$tmp" HAPP/JSONSUB.JSON
           fi
 
+          for f in HAPP/DEFAULT.JSON HAPP/WHITELIST.JSON; do
+            tmp="$(mktemp)"
+            jq --arg name "NurVPN" '.Name = $name' "$f" > "$tmp"
+            mv "$tmp" "$f"
+          done
+          tmp="$(mktemp)"
+          jq --arg name "NurVPN JSON" '.Name = $name' HAPP/JSONSUB.JSON > "$tmp"
+          mv "$tmp" HAPP/JSONSUB.JSON
+
           default_b64="$(jq -c . HAPP/DEFAULT.JSON | base64 -w 0)"
           whitelist_b64="$(jq -c . HAPP/WHITELIST.JSON | base64 -w 0)"
           jsonsub_b64="$(jq -c . HAPP/JSONSUB.JSON | base64 -w 0)"
@@ -184,6 +193,15 @@ jobs:
               INCY/JSONSUB.JSON > "$tmp"
             mv "$tmp" INCY/JSONSUB.JSON
           fi
+
+          for f in INCY/DEFAULT.JSON INCY/WHITELIST.JSON; do
+            tmp="$(mktemp)"
+            jq --arg name "NurVPN" '.Name = $name' "$f" > "$tmp"
+            mv "$tmp" "$f"
+          done
+          tmp="$(mktemp)"
+          jq --arg name "NurVPN JSON" '.Name = $name' INCY/JSONSUB.JSON > "$tmp"
+          mv "$tmp" INCY/JSONSUB.JSON
 
           default_b64="$(jq -c . INCY/DEFAULT.JSON | base64 -w 0)"
           whitelist_b64="$(jq -c . INCY/WHITELIST.JSON | base64 -w 0)"
@@ -370,3 +388,4 @@ jobs:
             echo "Failed: $FAIL_COUNT/$TOTAL servers"
             exit 1
           fi
+
