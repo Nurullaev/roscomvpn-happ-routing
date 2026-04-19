@@ -79,7 +79,8 @@ jobs:
               --arg ts "$now_epoch" \
               --arg geoip "$geoip_url" \
               --arg geosite "$geosite_url" \
-              '.LastUpdated = $ts | .Geoipurl = $geoip | .Geositeurl = $geosite' \
+              --arg name "NurVPN" \
+              '.LastUpdated = $ts | .Geoipurl = $geoip | .Geositeurl = $geosite | .Name = $name' \
               HAPP/DEFAULT.JSON > "$tmp"
             mv "$tmp" HAPP/DEFAULT.JSON
             tmp="$(mktemp)"
@@ -96,7 +97,8 @@ jobs:
               --arg ts "$now_epoch" \
               --arg geoip "$geoip_url" \
               --arg geosite "$geosite_url" \
-              '.LastUpdated = $ts | .Geoipurl = $geoip | .Geositeurl = $geosite' \
+              --arg name "NurVPN JSON" \
+              '.LastUpdated = $ts | .Geoipurl = $geoip | .Geositeurl = $geosite | .Name = $name' \
               HAPP/JSONSUB.JSON > "$tmp"
             mv "$tmp" HAPP/JSONSUB.JSON
           fi
@@ -159,7 +161,8 @@ jobs:
               --arg ts "$now_epoch" \
               --arg geoip "$geoip_url" \
               --arg geosite "$geosite_url" \
-              '.LastUpdated = $ts | .Geoipurl = $geoip | .Geositeurl = $geosite' \
+              --arg name "NurVPN" \
+              '.LastUpdated = $ts | .Geoipurl = $geoip | .Geositeurl = $geosite | .Name = $name' \
               INCY/DEFAULT.JSON > "$tmp"
             mv "$tmp" INCY/DEFAULT.JSON
             tmp="$(mktemp)"
@@ -176,7 +179,8 @@ jobs:
               --arg ts "$now_epoch" \
               --arg geoip "$geoip_url" \
               --arg geosite "$geosite_url" \
-              '.LastUpdated = $ts | .Geoipurl = $geoip | .Geositeurl = $geosite' \
+              --arg name "NurVPN JSON" \
+              '.LastUpdated = $ts | .Geoipurl = $geoip | .Geositeurl = $geosite | .Name = $name' \
               INCY/JSONSUB.JSON > "$tmp"
             mv "$tmp" INCY/JSONSUB.JSON
           fi
