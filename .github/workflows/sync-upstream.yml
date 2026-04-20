@@ -17,16 +17,41 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sync data files from upstream
+      - name: Sync data files from upstream and apply custom names
         run: |
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           git remote add upstream https://github.com/hydraponique/roscomvpn-routing.git
           git fetch upstream
+
           git checkout upstream/main -- HAPP/ INCY/
-          if git diff --cached --quiet; then
+
+          # Apply custom names
+          for f in HAPP/DEFAULT.JSON HAPP/WHITELIST.JSON INCY/DEFAULT.JSON INCY/WHITELIST.JSON; do
+            tmp="$(mktemp)"
+            jq --arg name "NurVPN" ".Name = \$name" "$f" > "$tmp"
+            mv "$tmp" "$f"
+          done
+          for f in HAPP/JSONSUB.JSON INCY/JSONSUB.JSON; do
+            tmp="$(mktemp)"
+            jq --arg name "NurVPN JSON" ".Name = \$name" "$f" > "$tmp"
+            mv "$tmp" "$f"
+          done
+
+          # Regenerate deeplinks
+          for f in DEFAULT WHITELIST JSONSUB; do
+            b64="$(jq -c . HAPP/${f}.JSON | base64 -w 0)"
+            printf "happ://routing/onadd/%s
+" "$b64" > HAPP/${f}.DEEPLINK
+            b64="$(jq -c . INCY/${f}.JSON | base64 -w 0)"
+            printf "incy://routing/onadd/%s
+" "$b64" > INCY/${f}.DEEPLINK
+          done
+
+          if git diff --quiet; then
             echo "Already up to date"
           else
-            git commit -m "sync data from upstream"
+            git add HAPP/ INCY/
+            git commit -m "sync from upstream + apply NurVPN names"
             git push origin main
           fi
