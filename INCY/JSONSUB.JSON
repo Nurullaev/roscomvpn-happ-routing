@@ -1,5 +1,5 @@
 {
-  "Name": "NurVPN JSON",
+  "Name": "RoscomVPN JSON",
   "GlobalProxy": "true",
   "UseChunkFiles": "false",
   "RemoteDns": "8.8.8.8",
@@ -12,7 +12,7 @@
   "DomesticDNSIP": "77.88.8.8",
   "Geoipurl": "https://cdn.jsdelivr.net/gh/hydraponique/roscomvpn-geoip/release/geoip.dat",
   "Geositeurl": "https://cdn.jsdelivr.net/gh/hydraponique/roscomvpn-geosite/release/geosite.dat",
-  "LastUpdated": "1776681966",
+  "LastUpdated": "1776664112",
   "DnsHosts": {
     "lkfl2.nalog.ru": "213.24.64.175",
     "lknpd.nalog.ru": "213.24.64.181"
