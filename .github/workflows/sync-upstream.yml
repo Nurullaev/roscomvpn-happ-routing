@@ -41,15 +41,17 @@ jobs:
           # Regenerate deeplinks
           for f in DEFAULT WHITELIST JSONSUB; do
             b64="$(jq -c . HAPP/${f}.JSON | base64 -w 0)"
-            printf 'happ://routing/onadd/%s\n' "$b64" > HAPP/${f}.DEEPLINK
+            printf 'happ://routing/onadd/%s
+' "$b64" > HAPP/${f}.DEEPLINK
             b64="$(jq -c . INCY/${f}.JSON | base64 -w 0)"
-            printf 'incy://routing/onadd/%s\n' "$b64" > INCY/${f}.DEEPLINK
+            printf 'incy://routing/onadd/%s
+' "$b64" > INCY/${f}.DEEPLINK
           done
 
-          if git diff --quiet; then
+          git add HAPP/ INCY/
+          if git diff --cached --quiet; then
             echo "Already up to date"
           else
-            git add HAPP/ INCY/
             git commit -m "sync from upstream + apply NurVPN names"
             git pull --rebase origin main
             git push origin main
