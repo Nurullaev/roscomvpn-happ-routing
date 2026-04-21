@@ -51,5 +51,6 @@ jobs:
           else
             git add HAPP/ INCY/
             git commit -m "sync from upstream + apply NurVPN names"
+            git pull --rebase origin main
             git push origin main
           fi
