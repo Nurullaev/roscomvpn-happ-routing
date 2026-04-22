@@ -41,11 +41,9 @@ jobs:
           # Regenerate deeplinks
           for f in DEFAULT WHITELIST JSONSUB; do
             b64="$(jq -c . HAPP/${f}.JSON | base64 -w 0)"
-            printf 'happ://routing/onadd/%s
-' "$b64" > HAPP/${f}.DEEPLINK
+            printf 'happ://routing/onadd/%s\n' "$b64" > HAPP/${f}.DEEPLINK
             b64="$(jq -c . INCY/${f}.JSON | base64 -w 0)"
-            printf 'incy://routing/onadd/%s
-' "$b64" > INCY/${f}.DEEPLINK
+            printf 'incy://routing/onadd/%s\n' "$b64" > INCY/${f}.DEEPLINK
           done
 
           git add HAPP/ INCY/
