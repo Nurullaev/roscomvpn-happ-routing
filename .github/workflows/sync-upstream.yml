@@ -38,6 +38,28 @@ jobs:
             mv "$tmp" "$f"
           done
 
+          # Extract geo file URLs from upstream JSON
+          GEOIP_URL="$(jq -r '.Geoipurl' HAPP/DEFAULT.JSON)"
+          GEOSITE_URL="$(jq -r '.Geositeurl' HAPP/DEFAULT.JSON)"
+          echo "Geoipurl:   $GEOIP_URL"
+          echo "Geositeurl: $GEOSITE_URL"
+
+          # Download geo files
+          curl -fsSL "$GEOIP_URL" -o geoip.dat
+          curl -fsSL "$GEOSITE_URL" -o geosite.dat
+          echo "Downloaded: $(du -sh geoip.dat geosite.dat)"
+
+          # Replace URLs in all JSON files with own CDN
+          CDN_GEOIP="https://cdn.nurvps.com/geo/geoip.dat"
+          CDN_GEOSITE="https://cdn.nurvps.com/geo/geosite.dat"
+          for f in HAPP/DEFAULT.JSON HAPP/WHITELIST.JSON HAPP/JSONSUB.JSON \
+                   INCY/DEFAULT.JSON INCY/WHITELIST.JSON INCY/JSONSUB.JSON; do
+            tmp="$(mktemp)"
+            jq --arg geoip "$CDN_GEOIP" --arg geosite "$CDN_GEOSITE" \
+              '.Geoipurl = $geoip | .Geositeurl = $geosite' "$f" > "$tmp"
+            mv "$tmp" "$f"
+          done
+
           # Regenerate deeplinks
           for f in DEFAULT WHITELIST JSONSUB; do
             b64="$(jq -c . HAPP/${f}.JSON | base64 -w 0)"
@@ -54,3 +76,28 @@ jobs:
             git pull --rebase origin main
             git push origin main
           fi
+
+      - name: Upload geo files to CDN
+        env:
+          CDN_SSH_KEY: ${{ secrets.CDN_SSH_KEY }}
+          CDN_SSH_HOST: ${{ secrets.CDN_SSH_HOST }}
+          CDN_SSH_USER: ${{ secrets.CDN_SSH_USER }}
+          CDN_SSH_PATH: ${{ secrets.CDN_SSH_PATH }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$CDN_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$CDN_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          # Upload geo files
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            geoip.dat geosite.dat \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}:${CDN_SSH_PATH}/"
+
+          echo "Uploaded geoip.dat and geosite.dat to ${CDN_SSH_HOST}:${CDN_SSH_PATH}/"
+
+          # Verify
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
+            "ls -lh ${CDN_SSH_PATH}/*.dat"
