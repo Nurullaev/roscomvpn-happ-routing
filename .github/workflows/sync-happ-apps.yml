@@ -1,0 +1,144 @@
+name: Sync Happ Apps to CDN
+
+on:
+  schedule:
+    - cron: "30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync Android APKs
+        env:
+          CDN_SSH_KEY: ${{ secrets.CDN_SSH_KEY }}
+          CDN_SSH_HOST: ${{ secrets.CDN_SSH_HOST }}
+          CDN_SSH_USER: ${{ secrets.CDN_SSH_USER }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$CDN_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$CDN_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          CDN_PATH="/var/www/cdn/apps"
+          REPO="Happ-proxy/happ-android"
+
+          # Get latest release tag
+          LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            | jq -r '.tag_name')
+          echo "Latest android tag: $LATEST_TAG"
+
+          # Get current tag from server
+          CURRENT_TAG=$(ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
+            "cat ${CDN_PATH}/.android_version 2>/dev/null || echo ''" )
+          echo "Current android tag: $CURRENT_TAG"
+
+          if [ "$LATEST_TAG" = "$CURRENT_TAG" ]; then
+            echo "Android APKs are up to date ($LATEST_TAG), skipping."
+            exit 0
+          fi
+
+          echo "New android version: $CURRENT_TAG → $LATEST_TAG"
+
+          # Get all asset URLs for this release
+          ASSETS=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            | jq -r '.assets[] | "\(.name) \(.browser_download_url)"')
+
+          # Download each APK if present in this release
+          echo "$ASSETS" | while read name url; do
+            case "$name" in
+              Happ.apk|Happ_beta.apk)
+                echo "Downloading $name from $url ..."
+                curl -fsSL "$url" -o "$name"
+                echo "  → $(du -sh $name | cut -f1)"
+                ;;
+            esac
+          done
+
+          # Upload whatever APKs were downloaded
+          DOWNLOADED=$(ls Happ.apk Happ_beta.apk 2>/dev/null)
+          if [ -z "$DOWNLOADED" ]; then
+            echo "No APKs found in release assets, skipping upload."
+            exit 0
+          fi
+
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            $DOWNLOADED \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}:${CDN_PATH}/"
+
+          # Save new version tag
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
+            "echo '${LATEST_TAG}' > ${CDN_PATH}/.android_version"
+
+          echo "Done. Uploaded: $DOWNLOADED (tag $LATEST_TAG)"
+
+          # Verify
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
+            "ls -lh ${CDN_PATH}/*.apk 2>/dev/null || echo 'no apk files'"
+
+      - name: Sync Desktop EXE
+        env:
+          CDN_SSH_KEY: ${{ secrets.CDN_SSH_KEY }}
+          CDN_SSH_HOST: ${{ secrets.CDN_SSH_HOST }}
+          CDN_SSH_USER: ${{ secrets.CDN_SSH_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$CDN_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$CDN_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          CDN_PATH="/var/www/cdn/apps"
+          REPO="Happ-proxy/happ-desktop"
+
+          # Get latest release (including prerelease — берём первый в списке)
+          RELEASE=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            | jq '.[0]')
+          LATEST_TAG=$(echo "$RELEASE" | jq -r '.tag_name')
+          echo "Latest desktop tag: $LATEST_TAG"
+
+          # Get current tag from server
+          CURRENT_TAG=$(ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
+            "cat ${CDN_PATH}/.desktop_version 2>/dev/null || echo ''")
+          echo "Current desktop tag: $CURRENT_TAG"
+
+          if [ "$LATEST_TAG" = "$CURRENT_TAG" ]; then
+            echo "Desktop EXE is up to date ($LATEST_TAG), skipping."
+            exit 0
+          fi
+
+          echo "New desktop version: $CURRENT_TAG → $LATEST_TAG"
+
+          # Download setup-Happ.x64.exe
+          EXE_URL=$(echo "$RELEASE" | jq -r '.assets[] | select(.name == "setup-Happ.x64.exe") | .browser_download_url')
+          if [ -z "$EXE_URL" ]; then
+            echo "setup-Happ.x64.exe not found in release assets, skipping."
+            exit 0
+          fi
+
+          echo "Downloading setup-Happ.x64.exe ..."
+          curl -fsSL "$EXE_URL" -o "setup-Happ.x64.exe"
+          echo "  → $(du -sh setup-Happ.x64.exe | cut -f1)"
+
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            setup-Happ.x64.exe \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}:${CDN_PATH}/"
+
+          # Save new version tag
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
+            "echo '${LATEST_TAG}' > ${CDN_PATH}/.desktop_version"
+
+          echo "Done. Uploaded setup-Happ.x64.exe (tag $LATEST_TAG)"
+
+          # Verify
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
+            "ls -lh ${CDN_PATH}/setup-Happ.x64.exe"
