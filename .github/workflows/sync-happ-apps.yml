@@ -21,7 +21,7 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$CDN_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-          CDN_PATH="/var/www/cdn/apps"
+          CDN_PATH="/var/www/cdn/apps"  # served as cdn.nurvpn.de/*
           REPO="Happ-proxy/happ-android"
 
           # Get latest release tag
@@ -93,7 +93,7 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "$CDN_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-          CDN_PATH="/var/www/cdn/apps"
+          CDN_PATH="/var/www/cdn/apps"  # served as cdn.nurvpn.de/*
           REPO="Happ-proxy/happ-desktop"
 
           # Get latest release (including prerelease — берём первый в списке)
@@ -123,12 +123,12 @@ jobs:
             exit 0
           fi
 
-          echo "Downloading setup-Happ.x64.exe ..."
-          curl -fsSL "$EXE_URL" -o "setup-Happ.x64.exe"
-          echo "  → $(du -sh setup-Happ.x64.exe | cut -f1)"
+          echo "Downloading setup-Happ.x64.exe → rename to setup-Happ.x86.exe ..."
+          curl -fsSL "$EXE_URL" -o "setup-Happ.x86.exe"
+          echo "  → $(du -sh setup-Happ.x86.exe | cut -f1)"
 
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            setup-Happ.x64.exe \
+            setup-Happ.x86.exe \
             "${CDN_SSH_USER}@${CDN_SSH_HOST}:${CDN_PATH}/"
 
           # Save new version tag
@@ -136,9 +136,9 @@ jobs:
             "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
             "echo '${LATEST_TAG}' > ${CDN_PATH}/.desktop_version"
 
-          echo "Done. Uploaded setup-Happ.x64.exe (tag $LATEST_TAG)"
+          echo "Done. Uploaded setup-Happ.x86.exe (tag $LATEST_TAG)"
 
           # Verify
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
             "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
-            "ls -lh ${CDN_PATH}/setup-Happ.x64.exe"
+            "ls -lh ${CDN_PATH}/setup-Happ.x86.exe"
