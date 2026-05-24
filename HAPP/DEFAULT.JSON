@@ -12,7 +12,7 @@
   "DomesticDNSIP": "77.88.8.8",
   "Geoipurl": "https://cdn.nurvps.com/geo/geoip.dat",
   "Geositeurl": "https://cdn.nurvps.com/geo/geosite.dat",
-  "LastUpdated": "1779517107",
+  "LastUpdated": "1779605127",
   "DnsHosts": {
     "lkfl2.nalog.ru": "213.24.64.175",
     "lknpd.nalog.ru": "213.24.64.181"
