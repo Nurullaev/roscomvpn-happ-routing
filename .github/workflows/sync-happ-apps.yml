@@ -12,6 +12,22 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug environment
+        env:
+          CDN_SSH_HOST: ${{ secrets.CDN_SSH_HOST }}
+          CDN_SSH_USER: ${{ secrets.CDN_SSH_USER }}
+          CDN_SSH_KEY: ${{ secrets.CDN_SSH_KEY }}
+        run: |
+          echo "=== Basic check ==="
+          echo "CDN_SSH_HOST is set: $([ -n "$CDN_SSH_HOST" ] && echo YES || echo NO)"
+          echo "CDN_SSH_USER is set: $([ -n "$CDN_SSH_USER" ] && echo YES || echo NO)"
+          echo "CDN_SSH_KEY length: ${#CDN_SSH_KEY}"
+          echo "=== GH CLI check ==="
+          gh api rate_limit --jq '.rate | "limit=\(.limit) remaining=\(.remaining)"'
+          echo "=== SSH keyscan check ==="
+          ssh-keyscan -T 5 -H "$CDN_SSH_HOST" 2>&1 | head -3 || echo "keyscan failed or timed out"
+          echo "=== Done ==="
+
       - name: Sync Android APKs
         env:
           CDN_SSH_KEY: ${{ secrets.CDN_SSH_KEY }}
