@@ -5,6 +5,9 @@ on:
     - cron: "30 * * * *"
   workflow_dispatch:
 
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -24,9 +27,8 @@ jobs:
           CDN_PATH="/var/www/cdn/apps"
           REPO="Happ-proxy/happ-android"
 
-          # Get latest release tag (public repo — без токена)
-          LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
-            | jq -r '.tag_name')
+          # Get latest release tag via gh CLI (handles auth automatically)
+          LATEST_TAG=$(gh api repos/${REPO}/releases/latest --jq '.tag_name')
           echo "Latest android tag: $LATEST_TAG"
 
           # Get current tag from server
@@ -42,26 +44,22 @@ jobs:
 
           echo "New android version: $CURRENT_TAG -> $LATEST_TAG"
 
-          # Get all asset URLs for this release
-          ASSETS=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
-            | jq -r '.assets[] | "\(.name) \(.browser_download_url)"')
-
-          # Download each APK if present in this release
-          echo "$ASSETS" | while read -r name url; do
-            case "$name" in
-              Happ.apk|Happ_beta.apk)
-                echo "Downloading $name ..."
-                curl -fsSL "$url" -o "$name"
-                echo "  -> $(du -sh $name | cut -f1)"
-                ;;
-            esac
+          # Download APKs directly via gh CLI
+          for name in Happ.apk Happ_beta.apk; do
+            url=$(gh api repos/${REPO}/releases/latest --jq ".assets[] | select(.name == \"${name}\") | .browser_download_url")
+            if [ -n "$url" ]; then
+              echo "Downloading $name ..."
+              curl -fsSL "$url" -o "$name"
+              echo "  -> $(du -sh $name | cut -f1)"
+            else
+              echo "$name not found in this release, skipping."
+            fi
           done
 
           # Upload whatever APKs were downloaded
-          # || true prevents set -e from triggering when files don't exist
           DOWNLOADED=$(ls Happ.apk Happ_beta.apk 2>/dev/null || true)
           if [ -z "$DOWNLOADED" ]; then
-            echo "No APKs found in release assets, skipping upload."
+            echo "No APKs found, skipping upload."
             exit 0
           fi
 
@@ -93,9 +91,8 @@ jobs:
           CDN_PATH="/var/www/cdn/apps"
           REPO="Happ-proxy/happ-desktop"
 
-          # Get latest release including prerelease (берём первый в списке)
-          RELEASE=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases" \
-            | jq '.[0]')
+          # Get latest release including prerelease (первый в списке)
+          RELEASE=$(gh api repos/${REPO}/releases --jq '.[0]')
           LATEST_TAG=$(echo "$RELEASE" | jq -r '.tag_name')
           echo "Latest desktop tag: $LATEST_TAG"
 
