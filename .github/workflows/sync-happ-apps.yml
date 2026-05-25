@@ -7,34 +7,22 @@ on:
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CDN_UPLOAD_TOKEN: ${{ secrets.CDN_UPLOAD_TOKEN }}
+  UPLOAD_BASE: "https://origin-cdn.nurvps.com/upload/apps"
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
       - name: Sync Android APKs
-        env:
-          CDN_SSH_KEY: ${{ secrets.CDN_SSH_KEY }}
-          CDN_SSH_HOST: ${{ secrets.CDN_SSH_HOST }}
-          CDN_SSH_USER: ${{ secrets.CDN_SSH_USER }}
         run: |
-          # Setup SSH
-          mkdir -p ~/.ssh
-          echo "$CDN_SSH_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -T 5 -H "$CDN_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
-
-          CDN_PATH="/var/www/cdn/apps"
           REPO="Happ-proxy/happ-android"
+          VERSION_URL="https://origin-cdn.nurvps.com/apps/.android_version"
 
-          # Get latest release tag via gh CLI (handles auth automatically)
           LATEST_TAG=$(gh api repos/${REPO}/releases/latest --jq '.tag_name')
           echo "Latest android tag: $LATEST_TAG"
 
-          # Get current tag from server
-          CURRENT_TAG=$(ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
-            "cat ${CDN_PATH}/.android_version 2>/dev/null || echo ''")
+          CURRENT_TAG=$(curl -fsS "$VERSION_URL" 2>/dev/null || echo '')
           echo "Current android tag: $CURRENT_TAG"
 
           if [ "$LATEST_TAG" = "$CURRENT_TAG" ]; then
@@ -63,43 +51,33 @@ jobs:
             exit 0
           fi
 
-          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            $DOWNLOADED \
-            "${CDN_SSH_USER}@${CDN_SSH_HOST}:${CDN_PATH}/"
+          for f in $DOWNLOADED; do
+            echo "Uploading $f ..."
+            curl -fsSL -X PUT \
+              -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
+              --data-binary @"$f" \
+              "${UPLOAD_BASE}/${f}"
+          done
 
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
-            "echo '${LATEST_TAG}' > ${CDN_PATH}/.android_version"
+          # Update version marker
+          echo "$LATEST_TAG" | curl -fsSL -X PUT \
+            -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
+            --data-binary @- \
+            "${UPLOAD_BASE}/.android_version"
 
           echo "Done. Uploaded: $DOWNLOADED (tag $LATEST_TAG)"
 
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
-            "ls -lh ${CDN_PATH}/*.apk 2>/dev/null || echo 'no apk files'"
-
       - name: Sync Desktop EXE
-        env:
-          CDN_SSH_KEY: ${{ secrets.CDN_SSH_KEY }}
-          CDN_SSH_HOST: ${{ secrets.CDN_SSH_HOST }}
-          CDN_SSH_USER: ${{ secrets.CDN_SSH_USER }}
         run: |
-          mkdir -p ~/.ssh
-          echo "$CDN_SSH_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -T 5 -H "$CDN_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
-
-          CDN_PATH="/var/www/cdn/apps"
           REPO="Happ-proxy/happ-desktop"
+          VERSION_URL="https://origin-cdn.nurvps.com/apps/.desktop_version"
 
-          # Get latest release including prerelease (первый в списке)
+          # Get latest release including prerelease (first in list)
           RELEASE=$(gh api repos/${REPO}/releases --jq '.[0]')
           LATEST_TAG=$(echo "$RELEASE" | jq -r '.tag_name')
           echo "Latest desktop tag: $LATEST_TAG"
 
-          # Get current tag from server
-          CURRENT_TAG=$(ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
-            "cat ${CDN_PATH}/.desktop_version 2>/dev/null || echo ''")
+          CURRENT_TAG=$(curl -fsS "$VERSION_URL" 2>/dev/null || echo '')
           echo "Current desktop tag: $CURRENT_TAG"
 
           if [ "$LATEST_TAG" = "$CURRENT_TAG" ]; then
@@ -119,16 +97,15 @@ jobs:
           curl -fsSL "$EXE_URL" -o "setup-Happ.x86.exe"
           echo "  -> $(du -sh setup-Happ.x86.exe | cut -f1)"
 
-          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            setup-Happ.x86.exe \
-            "${CDN_SSH_USER}@${CDN_SSH_HOST}:${CDN_PATH}/"
+          curl -fsSL -X PUT \
+            -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
+            --data-binary @"setup-Happ.x86.exe" \
+            "${UPLOAD_BASE}/setup-Happ.x86.exe"
 
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
-            "echo '${LATEST_TAG}' > ${CDN_PATH}/.desktop_version"
+          # Update version marker
+          echo "$LATEST_TAG" | curl -fsSL -X PUT \
+            -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
+            --data-binary @- \
+            "${UPLOAD_BASE}/.desktop_version"
 
           echo "Done. Uploaded setup-Happ.x86.exe (tag $LATEST_TAG)"
-
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            "${CDN_SSH_USER}@${CDN_SSH_HOST}" \
-            "ls -lh ${CDN_PATH}/setup-Happ.x86.exe"
