@@ -39,7 +39,7 @@ jobs:
           GEOSITE_REPO="hydraponique/roscomvpn-geosite"
 
           latest_tag() {
-            git ls-remote --tags "https://github.com/${1}.git" \
+            git -c http.extraheader="" ls-remote --tags "https://github.com/${1}.git" \
               | awk '{print $2}' \
               | sed -E 's@refs/tags/@@; s@\^\{\}@@' \
               | grep -E '^[0-9]{12}$' \
@@ -130,7 +130,7 @@ jobs:
           GEOSITE_REPO="hydraponique/roscomvpn-geosite"
 
           latest_tag() {
-            git ls-remote --tags "https://github.com/${1}.git" \
+            git -c http.extraheader="" ls-remote --tags "https://github.com/${1}.git" \
               | awk '{print $2}' \
               | sed -E 's@refs/tags/@@; s@\^\{\}@@' \
               | grep -E '^[0-9]{12}$' \
