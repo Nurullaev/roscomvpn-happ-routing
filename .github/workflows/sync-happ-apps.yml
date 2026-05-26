@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 
 env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CDN_UPLOAD_TOKEN: ${{ secrets.CDN_UPLOAD_TOKEN }}
   UPLOAD_BASE: "https://origin-cdn.nurvps.com/upload/apps"
+  GH_API: "https://api.github.com/repos"
 
 jobs:
   sync:
@@ -19,7 +19,7 @@ jobs:
           REPO="Happ-proxy/happ-android"
           VERSION_URL="https://origin-cdn.nurvps.com/apps/.android_version"
 
-          LATEST_TAG=$(gh api repos/${REPO}/releases/latest --jq '.tag_name')
+          LATEST_TAG=$(curl -fsSL "${GH_API}/${REPO}/releases/latest" | jq -r '.tag_name')
           echo "Latest android tag: $LATEST_TAG"
 
           CURRENT_TAG=$(curl -fsS "$VERSION_URL" 2>/dev/null || echo '')
@@ -32,9 +32,10 @@ jobs:
 
           echo "New android version: $CURRENT_TAG -> $LATEST_TAG"
 
-          # Download APKs directly via gh CLI
+          # Download APKs
+          RELEASE=$(curl -fsSL "${GH_API}/${REPO}/releases/latest")
           for name in Happ.apk Happ_beta.apk; do
-            url=$(gh api repos/${REPO}/releases/latest --jq ".assets[] | select(.name == \"${name}\") | .browser_download_url")
+            url=$(echo "$RELEASE" | jq -r ".assets[] | select(.name == \"${name}\") | .browser_download_url")
             if [ -n "$url" ]; then
               echo "Downloading $name ..."
               curl -fsSL "$url" -o "$name"
@@ -44,7 +45,6 @@ jobs:
             fi
           done
 
-          # Upload whatever APKs were downloaded
           DOWNLOADED=$(ls Happ.apk Happ_beta.apk 2>/dev/null || true)
           if [ -z "$DOWNLOADED" ]; then
             echo "No APKs found, skipping upload."
@@ -59,7 +59,6 @@ jobs:
               "${UPLOAD_BASE}/${f}"
           done
 
-          # Update version marker
           echo "$LATEST_TAG" | curl -fsSL -X PUT \
             -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
             --data-binary @- \
@@ -72,8 +71,7 @@ jobs:
           REPO="Happ-proxy/happ-desktop"
           VERSION_URL="https://origin-cdn.nurvps.com/apps/.desktop_version"
 
-          # Get latest release including prerelease (first in list)
-          RELEASE=$(gh api repos/${REPO}/releases --jq '.[0]')
+          RELEASE=$(curl -fsSL "${GH_API}/${REPO}/releases" | jq '.[0]')
           LATEST_TAG=$(echo "$RELEASE" | jq -r '.tag_name')
           echo "Latest desktop tag: $LATEST_TAG"
 
@@ -93,7 +91,7 @@ jobs:
             exit 0
           fi
 
-          echo "Downloading setup-Happ.x64.exe -> rename to setup-Happ.x86.exe ..."
+          echo "Downloading setup-Happ.x64.exe -> setup-Happ.x86.exe ..."
           curl -fsSL "$EXE_URL" -o "setup-Happ.x86.exe"
           echo "  -> $(du -sh setup-Happ.x86.exe | cut -f1)"
 
@@ -102,7 +100,6 @@ jobs:
             --data-binary @"setup-Happ.x86.exe" \
             "${UPLOAD_BASE}/setup-Happ.x86.exe"
 
-          # Update version marker
           echo "$LATEST_TAG" | curl -fsSL -X PUT \
             -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
             --data-binary @- \
