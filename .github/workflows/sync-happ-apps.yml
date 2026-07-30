@@ -5,8 +5,12 @@ on:
     - cron: "30 * * * *"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   CDN_UPLOAD_TOKEN: ${{ secrets.CDN_UPLOAD_TOKEN }}
+  GH_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   UPLOAD_BASE: "https://origin-cdn.nurvps.com/upload/apps"
   GH_API: "https://api.github.com/repos"
 
@@ -16,10 +20,21 @@ jobs:
     steps:
       - name: Sync Android APKs
         run: |
+          # Fetch GitHub API with token (1000 req/h) and retries.
+          # Falls back to anonymous (60 req/h) if the token is rejected.
+          gh_api() {
+            curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_API_TOKEN}" "$1" \
+            || curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
+              -H "Accept: application/vnd.github+json" "$1"
+          }
+
           REPO="Happ-proxy/happ-android"
           VERSION_URL="https://origin-cdn.nurvps.com/apps/.android_version"
 
-          LATEST_TAG=$(curl -fsSL "${GH_API}/${REPO}/releases/latest" | jq -r '.tag_name')
+          RELEASE=$(gh_api "${GH_API}/${REPO}/releases/latest")
+          LATEST_TAG=$(echo "$RELEASE" | jq -r '.tag_name')
           echo "Latest android tag: $LATEST_TAG"
 
           CURRENT_TAG=$(curl -fsS "$VERSION_URL" 2>/dev/null || echo '')
@@ -32,13 +47,11 @@ jobs:
 
           echo "New android version: $CURRENT_TAG -> $LATEST_TAG"
 
-          # Download APKs
-          RELEASE=$(curl -fsSL "${GH_API}/${REPO}/releases/latest")
           for name in Happ.apk Happ_beta.apk; do
             url=$(echo "$RELEASE" | jq -r ".assets[] | select(.name == \"${name}\") | .browser_download_url")
             if [ -n "$url" ]; then
               echo "Downloading $name ..."
-              curl -fsSL "$url" -o "$name"
+              curl -fsSL --retry 3 --retry-delay 5 "$url" -o "$name"
               echo "  -> $(du -sh $name | cut -f1)"
             else
               echo "$name not found in this release, skipping."
@@ -68,10 +81,18 @@ jobs:
 
       - name: Sync Desktop EXE
         run: |
+          gh_api() {
+            curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_API_TOKEN}" "$1" \
+            || curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
+              -H "Accept: application/vnd.github+json" "$1"
+          }
+
           REPO="Happ-proxy/happ-desktop"
           VERSION_URL="https://origin-cdn.nurvps.com/apps/.desktop_version"
 
-          RELEASE=$(curl -fsSL "${GH_API}/${REPO}/releases" | jq '.[0]')
+          RELEASE=$(gh_api "${GH_API}/${REPO}/releases" | jq '.[0]')
           LATEST_TAG=$(echo "$RELEASE" | jq -r '.tag_name')
           echo "Latest desktop tag: $LATEST_TAG"
 
@@ -92,7 +113,7 @@ jobs:
           fi
 
           echo "Downloading setup-Happ.x64.exe -> setup-Happ.x86.exe ..."
-          curl -fsSL "$EXE_URL" -o "setup-Happ.x86.exe"
+          curl -fsSL --retry 3 --retry-delay 5 "$EXE_URL" -o "setup-Happ.x86.exe"
           echo "  -> $(du -sh setup-Happ.x86.exe | cut -f1)"
 
           curl -fsSL -X PUT \
