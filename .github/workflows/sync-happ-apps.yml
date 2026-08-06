@@ -127,3 +127,63 @@ jobs:
             "${UPLOAD_BASE}/.desktop_version"
 
           echo "Done. Uploaded setup-Happ.x86.exe (tag $LATEST_TAG)"
+
+      - name: Sync INCY apps
+        run: |
+          gh_api() {
+            curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_API_TOKEN}" "$1" \
+            || curl -fsSL --retry 3 --retry-delay 5 --retry-all-errors \
+              -H "Accept: application/vnd.github+json" "$1"
+          }
+
+          REPO="INCY-DEV/incy-platforms"
+          VERSION_URL="https://origin-cdn.nurvps.com/apps/.incy_version"
+
+          # APK and Windows EXE ship in the same release
+          RELEASE=$(gh_api "${GH_API}/${REPO}/releases/latest")
+          LATEST_TAG=$(echo "$RELEASE" | jq -r '.tag_name')
+          echo "Latest incy tag: $LATEST_TAG"
+
+          CURRENT_TAG=$(curl -fsS "$VERSION_URL" 2>/dev/null || echo '')
+          echo "Current incy tag: $CURRENT_TAG"
+
+          if [ "$LATEST_TAG" = "$CURRENT_TAG" ]; then
+            echo "INCY apps are up to date ($LATEST_TAG), skipping."
+            exit 0
+          fi
+
+          echo "New incy version: $CURRENT_TAG -> $LATEST_TAG"
+
+          for name in Incy.apk incy-windows-setup.exe; do
+            url=$(echo "$RELEASE" | jq -r ".assets[] | select(.name == \"${name}\") | .browser_download_url")
+            if [ -n "$url" ]; then
+              echo "Downloading $name ..."
+              curl -fsSL --retry 3 --retry-delay 5 "$url" -o "$name"
+              echo "  -> $(du -sh $name | cut -f1)"
+            else
+              echo "$name not found in this release, skipping."
+            fi
+          done
+
+          DOWNLOADED=$(ls Incy.apk incy-windows-setup.exe 2>/dev/null || true)
+          if [ -z "$DOWNLOADED" ]; then
+            echo "No INCY files found, skipping upload."
+            exit 0
+          fi
+
+          for f in $DOWNLOADED; do
+            echo "Uploading $f ..."
+            curl -fsSL -X PUT \
+              -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
+              --data-binary @"$f" \
+              "${UPLOAD_BASE}/${f}"
+          done
+
+          echo "$LATEST_TAG" | curl -fsSL -X PUT \
+            -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
+            --data-binary @- \
+            "${UPLOAD_BASE}/.incy_version"
+
+          echo "Done. Uploaded: $DOWNLOADED (tag $LATEST_TAG)"
