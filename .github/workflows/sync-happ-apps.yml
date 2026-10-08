@@ -156,7 +156,7 @@ jobs:
 
           echo "New incy version: $CURRENT_TAG -> $LATEST_TAG"
 
-          for name in Incy.apk incy-windows-setup.exe; do
+          for name in Incy.apk incy-windows-setup.exe incy-macos-arm64.dmg incy-macos-intel.dmg; do
             url=$(echo "$RELEASE" | jq -r ".assets[] | select(.name == \"${name}\") | .browser_download_url")
             if [ -n "$url" ]; then
               echo "Downloading $name ..."
@@ -167,7 +167,7 @@ jobs:
             fi
           done
 
-          DOWNLOADED=$(ls Incy.apk incy-windows-setup.exe 2>/dev/null || true)
+          DOWNLOADED=$(ls Incy.apk incy-windows-setup.exe incy-macos-arm64.dmg incy-macos-intel.dmg 2>/dev/null || true)
           if [ -z "$DOWNLOADED" ]; then
             echo "No INCY files found, skipping upload."
             exit 0
