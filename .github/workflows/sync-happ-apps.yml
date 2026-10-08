@@ -106,27 +106,47 @@ jobs:
 
           echo "New desktop version: $CURRENT_TAG -> $LATEST_TAG"
 
-          EXE_URL=$(echo "$RELEASE" | jq -r '.assets[] | select(.name == "setup-Happ.x64.exe") | .browser_download_url')
-          if [ -z "$EXE_URL" ]; then
-            echo "setup-Happ.x64.exe not found in release assets, skipping."
+          # качаем под ОРИГИНАЛЬНЫМИ именами (раньше x64 переименовывался в x86 — имя врало)
+          for name in setup-Happ.x64.exe Happ.macOS.universal.dmg; do
+            url=$(echo "$RELEASE" | jq -r ".assets[] | select(.name == \"${name}\") | .browser_download_url")
+            if [ -n "$url" ]; then
+              echo "Downloading $name ..."
+              curl -fsSL --retry 3 --retry-delay 5 "$url" -o "$name"
+              echo "  -> $(du -sh $name | cut -f1)"
+            else
+              echo "$name not found in this release, skipping."
+            fi
+          done
+
+          DOWNLOADED=$(ls setup-Happ.x64.exe Happ.macOS.universal.dmg 2>/dev/null || true)
+          if [ -z "$DOWNLOADED" ]; then
+            echo "No desktop files found, skipping upload."
             exit 0
           fi
 
-          echo "Downloading setup-Happ.x64.exe -> setup-Happ.x86.exe ..."
-          curl -fsSL --retry 3 --retry-delay 5 "$EXE_URL" -o "setup-Happ.x86.exe"
-          echo "  -> $(du -sh setup-Happ.x86.exe | cut -f1)"
+          for f in $DOWNLOADED; do
+            echo "Uploading $f ..."
+            curl -fsSL -X PUT \
+              -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
+              --data-binary @"$f" \
+              "${UPLOAD_BASE}/${f}"
+          done
 
-          curl -fsSL -X PUT \
-            -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
-            --data-binary @"setup-Happ.x86.exe" \
-            "${UPLOAD_BASE}/setup-Happ.x86.exe"
+          # совместимость: старое (неверное) имя оставляем копией — на него есть внешние ссылки
+          if [ -f setup-Happ.x64.exe ]; then
+            echo "Uploading legacy alias setup-Happ.x86.exe ..."
+            curl -fsSL -X PUT \
+              -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
+              --data-binary @"setup-Happ.x64.exe" \
+              "${UPLOAD_BASE}/setup-Happ.x86.exe"
+          fi
 
           echo "$LATEST_TAG" | curl -fsSL -X PUT \
             -H "Authorization: Bearer $CDN_UPLOAD_TOKEN" \
             --data-binary @- \
             "${UPLOAD_BASE}/.desktop_version"
 
-          echo "Done. Uploaded setup-Happ.x86.exe (tag $LATEST_TAG)"
+          echo "Done. Uploaded: $DOWNLOADED (+ legacy setup-Happ.x86.exe, tag $LATEST_TAG)"
 
       - name: Sync INCY apps
         run: |
